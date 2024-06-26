@@ -1,4 +1,4 @@
-import { GoogleSignInButton } from "../../components/authButtons";
+import { GoogleSignInButton } from "../components/authButtons";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authConfig } from "../../utils/auth";
@@ -10,7 +10,7 @@ export default async function SignInPage() {
     }
 
     return (
-        <div>
+        <div className="flex items-center justify-center h-screen bg-gray-100">
             <GoogleSignInButton />
         </div>
     );
