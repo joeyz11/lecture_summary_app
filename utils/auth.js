@@ -1,4 +1,5 @@
 import GoogleProvider from "next-auth/providers/google";
+import { getServerSession } from "next-auth";
 
 export const authConfig = {
     providers: [
@@ -8,3 +9,8 @@ export const authConfig = {
         }),
     ],
 };
+
+export async function getSession() {
+    const session = await getServerSession(authConfig);
+    return session;
+}
