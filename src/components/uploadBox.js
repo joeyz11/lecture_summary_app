@@ -44,6 +44,7 @@ export default function UploadBox() {
             <input
                 type="text"
                 placeholder="Title"
+                id="title"
                 value={title}
                 onChange={handleTitleChange}
                 className="mb-4 px-4 py-2 border border-gray-300 rounded-md w-full"
@@ -51,6 +52,7 @@ export default function UploadBox() {
             <input
                 type="text"
                 placeholder="Short description"
+                id="description"
                 value={description}
                 onChange={handleDescriptionChange}
                 className="mb-4 px-4 py-2 border border-gray-300 rounded-md w-full"

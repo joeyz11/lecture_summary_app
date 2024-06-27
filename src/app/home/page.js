@@ -1,6 +1,6 @@
 import { SignOutButton } from "../../components/authButtons";
 import UploadBox from "../../components/uploadBox";
-import { test_audio, test_flashcard } from "./test";
+import { test_audio } from "./test";
 import Card from "@/components/card";
 import { getSession } from "../../../utils/auth";
 
