@@ -11,6 +11,7 @@ export default async function SignInPage() {
 
     return (
         <div className="flex items-center justify-center h-screen bg-gray-100">
+            <p>We are in {process.env.NEXT_PUBLIC_ENV}</p>
             <GoogleSignInButton />
         </div>
     );

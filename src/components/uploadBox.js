@@ -3,15 +3,13 @@
 import { useState } from "react";
 
 export default function UploadBox() {
-    const [selectedFile, setSelectedFile] = useState("");
+    const [file, setFile] = useState(null);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
 
     const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setSelectedFile(file.name);
-        }
+        const newFile = event.target.files[0];
+        setFile(newFile);
     };
 
     const handleTitleChange = (event) => {
@@ -22,9 +20,9 @@ export default function UploadBox() {
         setDescription(event.target.value);
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         console.log("upload clicked");
-        if (!selectedFile) {
+        if (!file) {
             alert("Please select a file to upload");
             return;
         }
@@ -32,9 +30,23 @@ export default function UploadBox() {
             alert("Please enter a title and description");
             return;
         }
-        //TODO: UPLOAD
-        alert("Upload success!!");
-        setSelectedFile("");
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("title", title);
+        formData.append("description", description);
+        let res = await fetch("/api/uploadS3", {
+            method: "POST",
+            body: formData,
+        });
+        res = await res.json();
+        if (res.error) {
+            console.log(res.error);
+        } else {
+            console.log(res.message);
+        }
+
+        setFile(null);
         setTitle("");
         setDescription("");
     };
@@ -77,14 +89,14 @@ export default function UploadBox() {
                     </div>
                 </label>
             </div>
-            {selectedFile ? (
+            {file ? (
                 <div className="w-full truncate">
-                    Selected file: {selectedFile}
+                    Selected file: {file.name}
                 </div>
             ) : (
                 <div className="">No file selected</div>
             )}
-            {selectedFile && title.trim() && description.trim() ? (
+            {file && title.trim() && description.trim() ? (
                 <button
                     className="text-center bg-blue-500 hover:opacity-50 text-white font-semibold py-2 px-4 rounded-3xl"
                     onClick={handleUpload}
