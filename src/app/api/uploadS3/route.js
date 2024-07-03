@@ -8,24 +8,25 @@ import {
 } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 
+const client = new S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+});
+
 export async function POST(req) {
     const formData = await req.formData();
     const file = formData.get("file");
-    const key = file.name;
     const bucket = process.env.AWS_S3_BUCKET_NAME;
-    const title = formData.get("title");
-    const description = formData.get("description");
+    const user_id = formData.get("user_id");
+    const created_at = formData.get("created_at");
+    const key = `${user_id}~${created_at}~${file.name}`;
+    console.log("key", key);
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
-    const client = new S3Client({
-        region: process.env.AWS_REGION,
-        credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        },
-    });
 
     const bufferSizeInMB = buffer.length / (1024 * 1024);
     console.log("buffer size in MB", bufferSizeInMB);
@@ -36,7 +37,7 @@ export async function POST(req) {
             // single
             const command = new PutObjectCommand({
                 Bucket: bucket,
-                Key: file.name,
+                Key: key,
                 Body: buffer,
                 ContentType: file.type,
             });

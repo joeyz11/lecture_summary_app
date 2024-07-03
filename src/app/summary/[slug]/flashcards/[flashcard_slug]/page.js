@@ -1,17 +1,35 @@
 "use client";
 
-import { test_flashcard } from "@/app/home/test";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import Slider from "@/components/slider";
 
 export default function FlashcardPage() {
+    const [flashcards, setFlashcards] = useState(null);
+    const [QandA, setQandA] = useState([]);
+
     const router = useRouter();
     const pathname = usePathname();
-    const audio_id = pathname.split("/")[2];
+    const created_at = pathname.split("/")[2];
     const flashcard_set_id = pathname.split("/")[4];
-    const flashcards = test_flashcard.filter(
-        (obj) => obj.flashcard_set_id.toString() === flashcard_set_id
-    )[0];
+
+    useEffect(() => {
+        fetch(
+            `/api/getFlashcardsData?&created_at=${created_at}&flashcard_set_id=${flashcard_set_id}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        )
+            .then((res) => res.json())
+            .then((json) => {
+                setFlashcards(json.data);
+                setQandA(zip(json.data.question_set, json.data.answer_set));
+            });
+    }, [created_at]);
 
     const zip = (arr1, arr2) => {
         const maxLength = Math.max(arr1.length, arr2.length);
@@ -22,14 +40,14 @@ export default function FlashcardPage() {
         return zipped;
     };
 
-    const QandA = zip(flashcards.question_set, flashcards.answer_set);
+    // const QandA = zip(flashcards.question_set, flashcards.answer_set);
 
     const handleHome = () => {
         router.push("/home");
     };
 
     const handleSummary = () => {
-        router.push(`/summary/${audio_id}`);
+        router.push(`/summary/${created_at}`);
     };
 
     return (
@@ -41,7 +59,7 @@ export default function FlashcardPage() {
                 >
                     Home
                 </button>
-                <div className="text-center">{flashcards.title}</div>
+                <div className="text-center">{flashcards?.title}</div>
                 <button
                     onClick={handleSummary}
                     className="w-32 bg-transparent hover:bg-orange-500 text-orange-700 font-semibold hover:text-white py-2 px-4 border border-orange-500 hover:border-transparent rounded"

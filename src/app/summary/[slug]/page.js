@@ -1,27 +1,34 @@
 "use client";
 
-import { test_audio } from "../../home/test";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function SummaryPage() {
+    const [audio, setAudio] = useState(null);
     const router = useRouter();
     const pathname = usePathname();
-    const audio_id = pathname.split("/")[2];
-    const audio = test_audio.filter(
-        (obj) => obj.audio_id.toString() === audio_id
-    )[0];
-    console.log("audio", audio);
-    // <div>{audio.user_id}</div>
-    // <div>{audio.audio_id}</div>
-    // <div>{audio.audio_link}</div>
-    // <div>{audio.flashcard_set_id}</div>
+    const created_at = pathname.split("/")[2];
+
+    useEffect(() => {
+        fetch(`/api/getAudioData?&created_at=${created_at}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+            .then((res) => res.json())
+            .then((json) => {
+                setAudio(json.data);
+            });
+    }, [created_at]);
+
     const handleHome = () => {
         router.push("/home");
     };
 
     const handleFlashcard = () => {
         router.push(
-            `/summary/${audio.audio_id}/flashcards/${audio.flashcard_set_id}`
+            `/summary/${audio.created_at}/flashcards/${audio.flashcard_set_id}`
         );
     };
 
@@ -34,7 +41,7 @@ export default function SummaryPage() {
                 >
                     Home
                 </button>
-                <div className="text-center">{audio.title}</div>
+                <div className="text-center">{audio?.title}</div>
                 <button
                     onClick={handleFlashcard}
                     className="w-32 bg-transparent hover:bg-orange-500 text-orange-700 font-semibold hover:text-white py-2 px-4 border border-orange-500 hover:border-transparent rounded"
@@ -43,9 +50,13 @@ export default function SummaryPage() {
                 </button>
             </div>
             <div className="text-center">play audio here</div>
-            <div className="text-center">{audio.description}</div>
-            <div>{audio.transcription}</div>
-            <div>{audio.summary}</div>
+            <div className="text-center">{audio?.description}</div>
+            <div className="text-center">{audio?.created_at}</div>
+            <div className="text-center">{audio?.flashcard_set_id}</div>
+            <div className="text-center">{audio?.s3_link}</div>
+            <div className="text-center">{audio?.user_id}</div>
+            <div>{audio?.transcription}</div>
+            <div>{audio?.summary}</div>
         </div>
     );
 }

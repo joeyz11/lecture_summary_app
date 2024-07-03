@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-export default function UploadBox() {
+export default function UploadBox({ userId }) {
     const [file, setFile] = useState(null);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -31,15 +32,42 @@ export default function UploadBox() {
             return;
         }
 
+        const flashcard_set_id = uuidv4();
+        const created_at = new Date().toISOString();
+
+        const uploadDB = fetch("/api/uploadDB", {
+            method: "POST",
+            body: JSON.stringify({
+                user_id: userId,
+                title: title,
+                description: description,
+                flashcard_set_id: flashcard_set_id,
+                created_at: created_at,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("title", title);
-        formData.append("description", description);
-        let res = await fetch("/api/uploadS3", {
+        formData.append("user_id", userId);
+        formData.append("created_at", created_at);
+        const uploadS3 = fetch("/api/uploadS3", {
             method: "POST",
             body: formData,
         });
-        res = await res.json();
+
+        const uploadDBRes = await uploadDB;
+        let res = await uploadDBRes.json();
+        if (res.error) {
+            console.log(res.error);
+        } else {
+            console.log(res.message);
+        }
+
+        const uploadS3Res = await uploadS3;
+        res = await uploadS3Res.json();
         if (res.error) {
             console.log(res.error);
         } else {
@@ -94,7 +122,7 @@ export default function UploadBox() {
                     Selected file: {file.name}
                 </div>
             ) : (
-                <div className="">No file selected</div>
+                <div className=""> No file selected</div>
             )}
             {file && title.trim() && description.trim() ? (
                 <button
