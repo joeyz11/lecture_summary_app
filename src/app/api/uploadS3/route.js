@@ -7,14 +7,9 @@ import {
     AbortMultipartUploadCommand,
 } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
+import { awsConfig } from "../../../../utils/auth";
 
-const client = new S3Client({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-});
+const client = new S3Client(awsConfig);
 
 export async function POST(req) {
     const formData = await req.formData();

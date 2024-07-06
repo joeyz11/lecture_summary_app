@@ -1,18 +1,16 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Slider from "@/components/slider";
 
-export default function FlashcardPage() {
+export default function FlashcardPage({ params }) {
+    const created_at = params.created_at;
+    const flashcard_set_id = params.flashcard_set_id;
     const [flashcards, setFlashcards] = useState(null);
-    const [QandA, setQandA] = useState([]);
 
     const router = useRouter();
-    const pathname = usePathname();
-    const created_at = pathname.split("/")[2];
-    const flashcard_set_id = pathname.split("/")[4];
 
     useEffect(() => {
         fetch(
@@ -27,20 +25,8 @@ export default function FlashcardPage() {
             .then((res) => res.json())
             .then((json) => {
                 setFlashcards(json.data);
-                setQandA(zip(json.data.question_set, json.data.answer_set));
             });
     }, [created_at]);
-
-    const zip = (arr1, arr2) => {
-        const maxLength = Math.max(arr1.length, arr2.length);
-        const zipped = [];
-        for (let i = 0; i < maxLength; i++) {
-            zipped.push([arr1[i], arr2[i]]);
-        }
-        return zipped;
-    };
-
-    // const QandA = zip(flashcards.question_set, flashcards.answer_set);
 
     const handleHome = () => {
         router.push("/home");
@@ -68,7 +54,7 @@ export default function FlashcardPage() {
                 </button>
             </div>
             <div className="flex justify-center items-center">
-                <Slider flashcards={QandA} />
+                <Slider flashcards={flashcards?.question_answer_set} />
             </div>
         </div>
     );

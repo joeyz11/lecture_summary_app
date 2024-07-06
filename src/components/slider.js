@@ -23,7 +23,7 @@ export default function Slider({ flashcards }) {
                     className="flex transition-transform duration-700 ease-in-out"
                     style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                 >
-                    {flashcards.map((flashcard, index) => (
+                    {flashcards?.map((flashcard, index) => (
                         <div key={index} className="min-w-full relative">
                             <FlipCard
                                 frontText={flashcard[0]}
@@ -52,7 +52,7 @@ export default function Slider({ flashcards }) {
                 ›
             </button>
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {flashcards.map((_, index) => (
+                {flashcards?.map((_, index) => (
                     <div
                         key={index}
                         className={`w-2 h-2 rounded-full ${

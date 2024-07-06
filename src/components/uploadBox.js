@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export default function UploadBox({ userId }) {
+export default function UploadBox({ userId, addHomeCard }) {
     const [file, setFile] = useState(null);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -22,7 +22,6 @@ export default function UploadBox({ userId }) {
     };
 
     const handleUpload = async () => {
-        console.log("upload clicked");
         if (!file) {
             alert("Please select a file to upload");
             return;
@@ -32,8 +31,19 @@ export default function UploadBox({ userId }) {
             return;
         }
 
+        setTitle("");
+        setDescription("");
+        setFile(null);
+
         const flashcard_set_id = uuidv4();
         const created_at = new Date().toISOString();
+
+        addHomeCard({
+            title: title,
+            description: description,
+            flashcard_set_id: flashcard_set_id,
+            created_at: created_at,
+        });
 
         const uploadDB = fetch("/api/uploadDB", {
             method: "POST",
@@ -65,6 +75,7 @@ export default function UploadBox({ userId }) {
         } else {
             console.log(res.message);
         }
+        console.log("db upload success");
 
         const uploadS3Res = await uploadS3;
         res = await uploadS3Res.json();
@@ -73,10 +84,7 @@ export default function UploadBox({ userId }) {
         } else {
             console.log(res.message);
         }
-
-        setFile(null);
-        setTitle("");
-        setDescription("");
+        console.log("s3 upload success");
     };
 
     return (
@@ -100,7 +108,7 @@ export default function UploadBox({ userId }) {
             <div className="flex flex-col items-center justify-center h-96 w-96 bg-gray-200 border-2 border-dashed border-gray-400 rounded-3xl">
                 <input
                     type="file"
-                    accept="audio/*" //TODO: maybe change
+                    accept="audio/*"
                     onChange={handleFileChange}
                     className="hidden"
                     id="file-upload"

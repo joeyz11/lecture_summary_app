@@ -1,14 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { NextResponse } from "next/server";
+import { awsConfig } from "../../../../utils/auth";
 
-const client = new DynamoDBClient({
-    region: process.env.AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-});
+const client = new DynamoDBClient(awsConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
 export async function POST(req) {
@@ -40,6 +35,9 @@ export async function POST(req) {
 
         let res = await audioRes;
         res = await flashcardsRes;
+
+        // testing, delete later
+        await new Promise((resolve) => setTimeout(resolve, 10000));
 
         return NextResponse.json(
             {

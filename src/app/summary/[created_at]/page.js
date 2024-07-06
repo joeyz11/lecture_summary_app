@@ -1,13 +1,12 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function SummaryPage() {
+export default function SummaryPage({ params }) {
     const [audio, setAudio] = useState(null);
     const router = useRouter();
-    const pathname = usePathname();
-    const created_at = pathname.split("/")[2];
+    const created_at = params.created_at;
 
     useEffect(() => {
         fetch(`/api/getAudioData?&created_at=${created_at}`, {
