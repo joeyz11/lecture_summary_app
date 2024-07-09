@@ -12,7 +12,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const created_at = searchParams.get("created_at");
     const flashcard_set_id = searchParams.get("flashcard_set_id");
-    const user_id = (await session).user.email;
+    const user_id = (await session).user.email.split("@")[0];
 
     try {
         const flashcardsGetCommand = new GetCommand({

@@ -17,8 +17,8 @@ export async function POST(req) {
     const bucket = process.env.AWS_S3_BUCKET_NAME;
     const user_id = formData.get("user_id");
     const created_at = formData.get("created_at");
-    const key = `${user_id}~${created_at}~${file.name}`;
-    console.log("key", key);
+    const key = `${user_id}___${created_at}___.${file.name.split(".").pop()}`;
+    const path = `audio/${key}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -32,7 +32,7 @@ export async function POST(req) {
             // single
             const command = new PutObjectCommand({
                 Bucket: bucket,
-                Key: key,
+                Key: path,
                 Body: buffer,
                 ContentType: file.type,
             });
@@ -58,7 +58,7 @@ export async function POST(req) {
             const multipartUpload = await client.send(
                 new CreateMultipartUploadCommand({
                     Bucket: bucket,
-                    Key: key,
+                    Key: path,
                 })
             );
 
@@ -77,14 +77,16 @@ export async function POST(req) {
                         .send(
                             new UploadPartCommand({
                                 Bucket: bucket,
-                                Key: key,
+                                Key: path,
                                 UploadId: uploadId,
                                 Body: buffer.subarray(start, end),
                                 PartNumber: part + 1,
                             })
                         )
                         .then((d) => {
-                            console.log("Part", part + 1, "uploaded");
+                            console.log(
+                                `Part ${part + 1} uploaded / ${parts} total`
+                            );
                             return d;
                         })
                 );
@@ -95,7 +97,7 @@ export async function POST(req) {
             const response = await client.send(
                 new CompleteMultipartUploadCommand({
                     Bucket: bucket,
-                    Key: key,
+                    Key: path,
                     UploadId: uploadId,
                     MultipartUpload: {
                         Parts: uploadResults.map(({ ETag }, i) => ({
@@ -118,7 +120,7 @@ export async function POST(req) {
             if (uploadId) {
                 const abortCommand = new AbortMultipartUploadCommand({
                     Bucket: bucket,
-                    Key: key,
+                    Key: path,
                     UploadId: uploadId,
                 });
 

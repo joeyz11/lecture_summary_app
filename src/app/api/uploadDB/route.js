@@ -36,9 +36,6 @@ export async function POST(req) {
         let res = await audioRes;
         res = await flashcardsRes;
 
-        // testing, delete later
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-
         return NextResponse.json(
             {
                 message: `uploaded successfully to db`,

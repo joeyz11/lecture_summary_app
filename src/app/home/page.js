@@ -26,16 +26,22 @@ export default function HomePage() {
     }, []);
 
     const { data } = useSession();
-    const user_id = data?.user.email;
+    const user_id = data?.user.email.split("@")[0];
 
     const addHomeCard = (card) => {
-        setHomeCards([card, ...homeCards]);
+        setTimeout(() => {
+            setHomeCards([card, ...homeCards]);
+        }, 500);
     };
 
     return (
         <div className="flex h-screen bg-neutral-100">
             <div className="w-36 flex flex-col items-center justify-start gap-y-4 pt-8">
-                <img src={data?.user.image} className="rounded-full" />
+                <img
+                    src={data?.user.image}
+                    className="rounded-full"
+                    referrerPolicy="no-referrer"
+                />
                 <SignOutButton />
             </div>
             <div className="flex-1 overflow-y-auto p-4">
@@ -47,19 +53,7 @@ export default function HomePage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                             {homeCards.map((audio) => (
                                 <div key={audio.created_at}>
-                                    {audio.isShadow ? (
-                                        // <shadowCard audio={audio} />
-                                        <div className="cursor-progress animate-pulse bg-gray-200 text-gray-400 flex flex-col gap-2 p-4 rounded shadow-md w-60 h-80">
-                                            <div className="text-xl font-bold">
-                                                {audio.title}
-                                            </div>
-                                            <div className="">
-                                                {audio.description}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <Card audio={audio} />
-                                    )}
+                                    <Card audio={audio} />
                                 </div>
                             ))}
                         </div>

@@ -31,12 +31,8 @@ export default function UploadBox({ userId, addHomeCard }) {
             return;
         }
 
-        setTitle("");
-        setDescription("");
-        setFile(null);
-
         const flashcard_set_id = uuidv4();
-        const created_at = new Date().toISOString();
+        const created_at = Date.now().toString();
 
         addHomeCard({
             title: title,
@@ -59,6 +55,15 @@ export default function UploadBox({ userId, addHomeCard }) {
             },
         });
 
+        const uploadDBRes = await uploadDB;
+        let res = await uploadDBRes.json();
+        if (res.error) {
+            console.log(res.error);
+        } else {
+            console.log(res.message);
+        }
+        console.log("db upload success");
+
         const formData = new FormData();
         formData.append("file", file);
         formData.append("user_id", userId);
@@ -68,14 +73,9 @@ export default function UploadBox({ userId, addHomeCard }) {
             body: formData,
         });
 
-        const uploadDBRes = await uploadDB;
-        let res = await uploadDBRes.json();
-        if (res.error) {
-            console.log(res.error);
-        } else {
-            console.log(res.message);
-        }
-        console.log("db upload success");
+        setTitle("");
+        setDescription("");
+        setFile(null);
 
         const uploadS3Res = await uploadS3;
         res = await uploadS3Res.json();

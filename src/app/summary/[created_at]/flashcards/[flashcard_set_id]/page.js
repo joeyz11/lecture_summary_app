@@ -26,7 +26,7 @@ export default function FlashcardPage({ params }) {
             .then((json) => {
                 setFlashcards(json.data);
             });
-    }, [created_at]);
+    }, []);
 
     const handleHome = () => {
         router.push("/home");
@@ -45,7 +45,9 @@ export default function FlashcardPage({ params }) {
                 >
                     Home
                 </button>
-                <div className="text-center">{flashcards?.title}</div>
+                <div className="text-center text-xl font-bold truncate">
+                    {flashcards?.title}
+                </div>
                 <button
                     onClick={handleSummary}
                     className="w-32 bg-transparent hover:bg-orange-500 text-orange-700 font-semibold hover:text-white py-2 px-4 border border-orange-500 hover:border-transparent rounded"
@@ -53,9 +55,13 @@ export default function FlashcardPage({ params }) {
                     Summary
                 </button>
             </div>
-            <div className="flex justify-center items-center">
-                <Slider flashcards={flashcards?.question_answer_set} />
-            </div>
+            {flashcards ? (
+                <div className="flex justify-center items-center">
+                    <Slider flashcards={flashcards?.question_answer_set} />
+                </div>
+            ) : (
+                <div className="text-center">Loading...</div>
+            )}
         </div>
     );
 }

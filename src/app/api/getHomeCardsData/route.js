@@ -9,7 +9,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 export async function GET() {
     const session = getSession();
-    const user_id = (await session).user.email;
+    const user_id = (await session).user.email.split("@")[0];
 
     try {
         const audioQueryCommand = new QueryCommand({
