@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { QueryCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { getSession, awsConfig } from "../../../../utils/auth";
+import { getSessionUserId, awsConfig } from "../../../../utils/auth";
 
 import { NextResponse } from "next/server";
 
@@ -8,8 +8,7 @@ const client = new DynamoDBClient(awsConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
 export async function GET() {
-    const session = getSession();
-    const user_id = (await session).user.email.split("@")[0];
+    const user_id = await getSessionUserId();
 
     try {
         const audioQueryCommand = new QueryCommand({

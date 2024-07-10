@@ -10,9 +10,10 @@ export const authConfig = {
     ],
 };
 
-export async function getSession() {
+export async function getSessionUserId() {
     const session = await getServerSession(authConfig);
-    return session;
+    const user_id = (await session).user.email.split("@")[0];
+    return user_id;
 }
 
 export const awsConfig = {
