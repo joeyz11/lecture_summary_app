@@ -29,6 +29,7 @@ export default function SummaryPage({ params }) {
                 setAudioSrc(
                     `${process.env.NEXT_PUBLIC_AWS_CLOUD_FRONT_DOMAIN_NAME}${s3Key}`
                 );
+                console.log("vtt client", audio?.vtt);
             });
     }, []);
 
@@ -91,7 +92,13 @@ export default function SummaryPage({ params }) {
                                     Transcription
                                 </h2>
                                 <div className=" h-full overflow-y-auto border p-4 bg-neutral-50">
-                                    <p>{audio?.transcription}</p>
+                                    {audio && audio.vtt ? (
+                                        <div className="whitespace-pre-line text-sm">
+                                            {audio.vtt}
+                                        </div>
+                                    ) : (
+                                        <div>No transcript yet</div>
+                                    )}
                                 </div>
                             </div>
 
@@ -100,7 +107,13 @@ export default function SummaryPage({ params }) {
                                     Summary
                                 </h2>
                                 <div className=" h-full overflow-y-auto border p-4 bg-neutral-50">
-                                    <p>{audio?.transcription}</p>
+                                    {audio && audio.summary ? (
+                                        <div className="whitespace-pre-line text-sm">
+                                            {audio.summary}
+                                        </div>
+                                    ) : (
+                                        <div>No summary yet</div>
+                                    )}
                                 </div>
                             </div>
                         </div>

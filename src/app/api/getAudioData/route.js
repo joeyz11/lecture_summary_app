@@ -24,9 +24,6 @@ export async function GET(req) {
             },
         });
         const audioRes = await docClient.send(audioGetCommand);
-        console.log("audiogetcommand res", audioRes);
-
-        console.log("audio item", audioRes.Item);
 
         return NextResponse.json(
             {
