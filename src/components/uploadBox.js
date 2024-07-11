@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export default function UploadBox({ userId, addHomeCard }) {
+export default function UploadBox({
+    userId,
+    addShadowCard,
+    replaceWithHomeCard,
+}) {
     const [file, setFile] = useState(null);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -34,11 +38,11 @@ export default function UploadBox({ userId, addHomeCard }) {
         const flashcard_set_id = uuidv4();
         const created_at = Date.now().toString();
 
-        addHomeCard({
+        addShadowCard({
             title: title,
             description: description,
-            flashcard_set_id: flashcard_set_id,
             created_at: created_at,
+            is_shadow: true,
         });
 
         const uploadDB = fetch("/api/uploadDB", {
@@ -55,15 +59,6 @@ export default function UploadBox({ userId, addHomeCard }) {
             },
         });
 
-        const uploadDBRes = await uploadDB;
-        let res = await uploadDBRes.json();
-        if (res.error) {
-            console.log(res.error);
-        } else {
-            console.log(res.message);
-        }
-        console.log("db upload success");
-
         const formData = new FormData();
         formData.append("file", file);
         formData.append("user_id", userId);
@@ -77,6 +72,15 @@ export default function UploadBox({ userId, addHomeCard }) {
         setDescription("");
         setFile(null);
 
+        const uploadDBRes = await uploadDB;
+        let res = await uploadDBRes.json();
+        if (res.error) {
+            console.log(res.error);
+        } else {
+            console.log(res.message);
+        }
+        console.log(title, "db upload success");
+
         const uploadS3Res = await uploadS3;
         res = await uploadS3Res.json();
         if (res.error) {
@@ -84,7 +88,48 @@ export default function UploadBox({ userId, addHomeCard }) {
         } else {
             console.log(res.message);
         }
-        console.log("s3 upload success");
+        console.log(title, "s3 upload success");
+
+        replaceWithHomeCard(created_at);
+
+        pollThenGenerateSummaryAndFlashcards(created_at, flashcard_set_id);
+    };
+
+    const pollThenGenerateSummaryAndFlashcards = (
+        created_at,
+        flashcard_set_id
+    ) => {
+        const POLL_INTERVAL = 5000;
+        let timeoutId;
+
+        const poll = () => {
+            fetch("/api/generateSummaryAndFlashcards", {
+                method: "POST",
+                body: JSON.stringify({
+                    created_at: created_at,
+                    flashcard_set_id: flashcard_set_id,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+                .then((res) => res.json())
+                .then((json) => {
+                    clearTimeout(timeoutId);
+                    if (!json.generated) {
+                        console.log("generated was false");
+                        timeoutId = setTimeout(poll, POLL_INTERVAL);
+                    } else {
+                        console.log("generated was true");
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error fetching data:", err);
+                    clearTimeout(timeoutId);
+                });
+        };
+
+        poll();
     };
 
     return (
@@ -134,7 +179,7 @@ export default function UploadBox({ userId, addHomeCard }) {
             )}
             {file && title.trim() && description.trim() ? (
                 <button
-                    className="text-center bg-blue-500 hover:opacity-50 text-white font-semibold py-2 px-4 rounded-3xl"
+                    className="text-center bg-blue-500 hover:opacity-80 text-white font-semibold py-2 px-4 rounded-3xl"
                     onClick={handleUpload}
                 >
                     Upload

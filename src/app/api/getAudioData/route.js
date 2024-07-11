@@ -11,8 +11,6 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const created_at = searchParams.get("created_at");
     const user_id = await getSessionUserId();
-    console.log("user_id", user_id);
-    console.log("created_at", created_at);
 
     try {
         const audioGetCommand = new GetCommand({

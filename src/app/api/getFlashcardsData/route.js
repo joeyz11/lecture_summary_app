@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { GetCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { getSessionUserId, awsConfig } from "../../../../utils/auth";
+import { awsConfig } from "../../../../utils/auth";
 
 import { NextResponse } from "next/server";
 
@@ -11,7 +11,6 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const created_at = searchParams.get("created_at");
     const flashcard_set_id = searchParams.get("flashcard_set_id");
-    const user_id = await getSessionUserId();
 
     try {
         const flashcardsGetCommand = new GetCommand({
@@ -22,9 +21,6 @@ export async function GET(req) {
             },
         });
         const flashcardsRes = await docClient.send(flashcardsGetCommand);
-        console.log("audiogetcommand res", flashcardsRes);
-
-        console.log("audio item", flashcardsRes.Item);
 
         return NextResponse.json(
             {

@@ -4,7 +4,8 @@ import { SignOutButton } from "../../components/authButtons";
 import UploadBox from "../../components/uploadBox";
 import Card from "@/components/card";
 import Image from "next/image";
-import shadowCard from "@/components/shadowCard";
+import ShadowCard from "@/components/shadowCard";
+import LoadingSpinner from "@/components/loadingSpinner";
 
 import { useSession } from "next-auth/react";
 
@@ -29,10 +30,27 @@ export default function HomePage() {
     const { data } = useSession();
     const user_id = data?.user.email.split("@")[0];
 
-    const addHomeCard = (card) => {
-        setTimeout(() => {
-            setHomeCards([card, ...homeCards]);
-        }, 500);
+    const addShadowCard = (shadowCard) => {
+        setHomeCards((prevHomeCards) => [shadowCard, ...prevHomeCards]);
+    };
+
+    const replaceWithHomeCard = (created_at) => {
+        setHomeCards((prevHomeCards) => {
+            const indexToReplace = prevHomeCards.findIndex(
+                (card) => card.created_at === created_at
+            );
+
+            if (indexToReplace !== -1) {
+                const updatedCards = [...prevHomeCards];
+                updatedCards[indexToReplace] = {
+                    ...updatedCards[indexToReplace],
+                    is_shadow: false,
+                };
+                return updatedCards;
+            } else {
+                return prevHomeCards;
+            }
+        });
     };
 
     return (
@@ -45,6 +63,7 @@ export default function HomePage() {
                         width={100}
                         height={100}
                         quality={100}
+                        priority
                         className="rounded-full"
                     />
                 ) : (
@@ -54,7 +73,11 @@ export default function HomePage() {
             </div>
             <div className="flex-1 overflow-y-scroll p-4">
                 <div className="flex h-fit justify-center">
-                    <UploadBox userId={user_id} addHomeCard={addHomeCard} />
+                    <UploadBox
+                        userId={user_id}
+                        addShadowCard={addShadowCard}
+                        replaceWithHomeCard={replaceWithHomeCard}
+                    />
                 </div>
                 <div className="flex container mx-auto p-4 justify-center">
                     {homeCards ? (
@@ -62,7 +85,11 @@ export default function HomePage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                                 {homeCards.map((audio) => (
                                     <div key={audio.created_at}>
-                                        <Card audio={audio} />
+                                        {audio.is_shadow ? (
+                                            <ShadowCard audio={audio} />
+                                        ) : (
+                                            <Card audio={audio} />
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -70,7 +97,7 @@ export default function HomePage() {
                             <div>No audio yet...</div>
                         )
                     ) : (
-                        <div>Loading...</div>
+                        <LoadingSpinner />
                     )}
                 </div>
             </div>

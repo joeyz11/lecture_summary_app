@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Slider from "@/components/slider";
+import LoadingSpinner from "@/components/loadingSpinner";
 
 export default function FlashcardPage({ params }) {
     const created_at = params.created_at;
@@ -60,7 +61,7 @@ export default function FlashcardPage({ params }) {
                     <Slider flashcards={flashcards?.question_answer_set} />
                 </div>
             ) : (
-                <div className="text-center">Loading...</div>
+                <LoadingSpinner />
             )}
         </div>
     );

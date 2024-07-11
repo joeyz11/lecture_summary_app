@@ -9,10 +9,6 @@ export default function Card({ audio }) {
         router.push(`/summary/${created_at}`);
     };
 
-    const handleFlashcard = (created_at, flashcard_set_id) => {
-        router.push(`/summary/${created_at}/flashcards/${flashcard_set_id}`);
-    };
-
     return (
         <div
             key={audio.created_at}
@@ -25,14 +21,6 @@ export default function Card({ audio }) {
                 onClick={() => handleSummary(audio.created_at)}
             >
                 Summary
-            </button>
-            <button
-                className="bg-transparent hover:bg-orange-500 text-orange-700 font-semibold hover:text-white py-2 px-4 border border-orange-500 hover:border-transparent rounded"
-                onClick={() =>
-                    handleFlashcard(audio.created_at, audio.flashcard_set_id)
-                }
-            >
-                Flashcard
             </button>
         </div>
     );
