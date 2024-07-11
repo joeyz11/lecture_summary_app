@@ -18,7 +18,7 @@ export async function GET() {
                 ":user_id": user_id,
             },
             ProjectionExpression:
-                "title, description, flashcard_set_id, created_at",
+                "title, description, flashcard_set_id, created_at, is_shadow",
             ScanIndexForward: false,
         });
         const audioRes = await docClient.send(audioQueryCommand);

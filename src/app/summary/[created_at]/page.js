@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import LoadingSpinner from "@/components/loadingSpinner";
+import { AUDIO_DATA_POLL_INTERVAL } from "../../../../utils/const";
 
 export default function SummaryPage({ params }) {
     const [audio, setAudio] = useState(null);
     const router = useRouter();
     const created_at = params.created_at;
-    const POLL_INTERVAL = 5000;
 
     useEffect(() => {
         let timeoutId;
@@ -30,7 +30,10 @@ export default function SummaryPage({ params }) {
                         )
                     ) {
                         clearTimeout(timeoutId);
-                        timeoutId = setTimeout(fetchAudio, POLL_INTERVAL);
+                        timeoutId = setTimeout(
+                            fetchAudio,
+                            AUDIO_DATA_POLL_INTERVAL
+                        );
                     }
                 })
                 .catch((err) => {
@@ -47,12 +50,10 @@ export default function SummaryPage({ params }) {
     }, []);
 
     const handleHome = () => {
-        localStorage.removeItem("generating");
         router.push("/home");
     };
 
     const handleFlashcard = () => {
-        localStorage.removeItem("generating");
         router.push(
             `/summary/${created_at}/flashcards/${audio?.flashcard_set_id}`
         );

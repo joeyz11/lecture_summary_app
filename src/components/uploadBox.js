@@ -35,101 +35,43 @@ export default function UploadBox({
             return;
         }
 
-        const flashcard_set_id = uuidv4();
         const created_at = Date.now().toString();
+        const flashcard_set_id = uuidv4();
+        const is_shadow = true;
+
+        const formData = new FormData();
+        formData.append("user_id", userId);
+        formData.append("created_at", created_at);
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("flashcard_set_id", flashcard_set_id);
+        formData.append("is_shadow", is_shadow);
+        formData.append("file", file);
+        const upload = fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
 
         addShadowCard({
             title: title,
             description: description,
             created_at: created_at,
-            is_shadow: true,
-        });
-
-        const uploadDB = fetch("/api/uploadDB", {
-            method: "POST",
-            body: JSON.stringify({
-                user_id: userId,
-                title: title,
-                description: description,
-                flashcard_set_id: flashcard_set_id,
-                created_at: created_at,
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("user_id", userId);
-        formData.append("created_at", created_at);
-        const uploadS3 = fetch("/api/uploadS3", {
-            method: "POST",
-            body: formData,
+            is_shadow: is_shadow,
         });
 
         setTitle("");
         setDescription("");
         setFile(null);
 
-        const uploadDBRes = await uploadDB;
-        let res = await uploadDBRes.json();
+        const uploadRes = await upload;
+        let res = await uploadRes.json();
         if (res.error) {
             console.log(res.error);
         } else {
             console.log(res.message);
         }
-        console.log(title, "db upload success");
-
-        const uploadS3Res = await uploadS3;
-        res = await uploadS3Res.json();
-        if (res.error) {
-            console.log(res.error);
-        } else {
-            console.log(res.message);
-        }
-        console.log(title, "s3 upload success");
 
         replaceWithHomeCard(created_at);
-
-        pollThenGenerateSummaryAndFlashcards(created_at, flashcard_set_id);
-    };
-
-    const pollThenGenerateSummaryAndFlashcards = (
-        created_at,
-        flashcard_set_id
-    ) => {
-        const POLL_INTERVAL = 5000;
-        let timeoutId;
-
-        const poll = () => {
-            fetch("/api/generateSummaryAndFlashcards", {
-                method: "POST",
-                body: JSON.stringify({
-                    created_at: created_at,
-                    flashcard_set_id: flashcard_set_id,
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-                .then((res) => res.json())
-                .then((json) => {
-                    clearTimeout(timeoutId);
-                    if (!json.generated) {
-                        console.log("generated was false");
-                        timeoutId = setTimeout(poll, POLL_INTERVAL);
-                    } else {
-                        console.log("generated was true");
-                    }
-                })
-                .catch((err) => {
-                    console.error("Error fetching data:", err);
-                    clearTimeout(timeoutId);
-                });
-        };
-
-        poll();
     };
 
     return (

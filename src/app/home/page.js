@@ -8,11 +8,12 @@ import ShadowCard from "@/components/shadowCard";
 import LoadingSpinner from "@/components/loadingSpinner";
 
 import { useSession } from "next-auth/react";
-
 import { useState, useEffect } from "react";
 
 export default function HomePage() {
     const [homeCards, setHomeCards] = useState(null);
+    const { data } = useSession();
+    const user_id = data?.user.email.split("@")[0];
 
     useEffect(() => {
         fetch("/api/getHomeCardsData", {
@@ -26,9 +27,6 @@ export default function HomePage() {
                 setHomeCards(json.data);
             });
     }, []);
-
-    const { data } = useSession();
-    const user_id = data?.user.email.split("@")[0];
 
     const addShadowCard = (shadowCard) => {
         setHomeCards((prevHomeCards) => [shadowCard, ...prevHomeCards]);

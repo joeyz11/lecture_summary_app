@@ -1,6 +1,3 @@
-import { getSessionUserId, awsConfig } from "../../../../utils/auth";
-import { convertTimestampTextToTranscription } from "../../../../utils/utils";
-
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
     GetCommand,
@@ -8,17 +5,19 @@ import {
     DynamoDBDocumentClient,
 } from "@aws-sdk/lib-dynamodb";
 
-import { NextResponse } from "next/server";
+import { awsConfig } from "../../../../../utils/auth";
+import { convertTimestampTextToTranscription } from "../../../../../utils/utils";
 
 const client = new DynamoDBClient(awsConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
-export async function POST(req) {
-    const { created_at, flashcard_set_id } = await req.json();
-    const user_id = await getSessionUserId();
-
+export default async function generateSummaryAndFlashcards(
+    user_id,
+    created_at,
+    flashcard_set_id
+) {
     try {
-        // 1. poll vtt from db
+        // 1. get vtt from db
         const audioGetCommand = new GetCommand({
             TableName: process.env.AWS_DYNAMO_DB_AUDIO_TABLE_NAME,
             Key: {
@@ -29,15 +28,6 @@ export async function POST(req) {
         });
         let audioRes = await docClient.send(audioGetCommand);
         const vtt = audioRes.Item.vtt;
-        if (!vtt) {
-            return NextResponse.json(
-                {
-                    message: `vtt does not exist yet`,
-                    generated: false,
-                },
-                { status: 200 }
-            );
-        }
 
         // 2. tranform to transcription using convertTimestampTextToTranscription
         const transcript = convertTimestampTextToTranscription(vtt);
@@ -65,7 +55,7 @@ export async function POST(req) {
                 ":summary": summary,
             },
         });
-        audioRes = await docClient.send(audioUpdateCommand);
+        await docClient.send(audioUpdateCommand);
 
         // 5. update flashcards in db
         const flashcardsUpdateCommand = new UpdateCommand({
@@ -82,20 +72,12 @@ export async function POST(req) {
                 ":question_answer_set": flashcards,
             },
         });
-        let flashcardsRes = await docClient.send(flashcardsUpdateCommand);
+        await docClient.send(flashcardsUpdateCommand);
 
-        return NextResponse.json(
-            {
-                message: `generated and uploaded successfully to db`,
-                generated: true,
-            },
-            { status: 200 }
-        );
+        console.log("success generate summary and flashcards");
+        return { message: `generated and uploaded successfully to db` };
     } catch (err) {
         console.log("generate summary and flashcards error", err);
-        return NextResponse.json(
-            { error: `Failed to query ${err}` },
-            { status: 500 }
-        );
+        return { error: `Failed to query ${err}` };
     }
 }

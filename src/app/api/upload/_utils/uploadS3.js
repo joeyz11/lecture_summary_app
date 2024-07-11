@@ -6,17 +6,13 @@ import {
     CompleteMultipartUploadCommand,
     AbortMultipartUploadCommand,
 } from "@aws-sdk/client-s3";
-import { NextResponse } from "next/server";
-import { awsConfig } from "../../../../utils/auth";
 
-const client = new S3Client(awsConfig);
+import { awsConfig } from "../../../../../utils/auth";
 
-export async function POST(req) {
-    const formData = await req.formData();
-    const file = formData.get("file");
+const s3client = new S3Client(awsConfig);
+
+export default async function uploadS3(user_id, created_at, file) {
     const bucket = process.env.AWS_S3_BUCKET_NAME;
-    const user_id = formData.get("user_id");
-    const created_at = formData.get("created_at");
     const key = `${user_id}___${created_at}___.${file.name.split(".").pop()}`;
     const path = `audio/${key}`;
 
@@ -37,25 +33,21 @@ export async function POST(req) {
                 ContentType: file.type,
             });
 
-            const response = await client.send(command);
+            await s3client.send(command);
 
-            return NextResponse.json(
-                {
-                    message: `File of size ${bufferSizeInMB}MB uploaded successfully`,
-                },
-                { status: 200 }
-            );
+            return {
+                message: `File of size ${bufferSizeInMB}MB uploaded successfully`,
+            };
         } catch (err) {
-            return NextResponse.json(
-                { error: `Failed to upload file of size ${bufferSizeInMB}MB` },
-                { status: 500 }
-            );
+            return {
+                error: `Failed to upload file of size ${bufferSizeInMB}MB`,
+            };
         }
     } else {
         let uploadId;
         try {
             // multipart
-            const multipartUpload = await client.send(
+            const multipartUpload = await s3client.send(
                 new CreateMultipartUploadCommand({
                     Bucket: bucket,
                     Key: path,
@@ -73,7 +65,7 @@ export async function POST(req) {
                 const start = part * partSize;
                 const end = start + partSize;
                 uploadPromises.push(
-                    client
+                    s3client
                         .send(
                             new UploadPartCommand({
                                 Bucket: bucket,
@@ -94,7 +86,7 @@ export async function POST(req) {
 
             const uploadResults = await Promise.all(uploadPromises);
 
-            const response = await client.send(
+            await s3client.send(
                 new CompleteMultipartUploadCommand({
                     Bucket: bucket,
                     Key: path,
@@ -108,12 +100,9 @@ export async function POST(req) {
                 })
             );
 
-            return NextResponse.json(
-                {
-                    message: `File of size ${bufferSizeInMB}MB uploaded successfully`,
-                },
-                { status: 200 }
-            );
+            return {
+                message: `File of size ${bufferSizeInMB}MB uploaded successfully`,
+            };
         } catch (err) {
             console.error(err);
 
@@ -124,12 +113,11 @@ export async function POST(req) {
                     UploadId: uploadId,
                 });
 
-                await client.send(abortCommand);
+                await s3client.send(abortCommand);
             }
-            return NextResponse.json(
-                { error: `Failed to upload file of size ${bufferSizeInMB}MB` },
-                { status: 500 }
-            );
+            return {
+                error: `Failed to upload file of size ${bufferSizeInMB}MB`,
+            };
         }
     }
 }

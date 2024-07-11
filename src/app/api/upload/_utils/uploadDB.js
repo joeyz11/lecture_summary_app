@@ -1,15 +1,19 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { PutCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { NextResponse } from "next/server";
-import { awsConfig } from "../../../../utils/auth";
+
+import { awsConfig } from "../../../../../utils/auth";
 
 const client = new DynamoDBClient(awsConfig);
 const docClient = DynamoDBDocumentClient.from(client);
 
-export async function POST(req) {
-    const { user_id, title, description, flashcard_set_id, created_at } =
-        await req.json();
-
+export default async function uploadDB(
+    user_id,
+    created_at,
+    title,
+    description,
+    flashcard_set_id,
+    is_shadow
+) {
     try {
         const audioPutCommand = new PutCommand({
             TableName: process.env.AWS_DYNAMO_DB_AUDIO_TABLE_NAME,
@@ -19,6 +23,7 @@ export async function POST(req) {
                 description: description,
                 flashcard_set_id: flashcard_set_id,
                 created_at: created_at,
+                is_shadow: is_shadow,
             },
         });
         const audioRes = docClient.send(audioPutCommand);
@@ -33,19 +38,11 @@ export async function POST(req) {
         });
         const flashcardsRes = docClient.send(flashcardsPutCommand);
 
-        let res = await audioRes;
-        res = await flashcardsRes;
+        await audioRes;
+        await flashcardsRes;
 
-        return NextResponse.json(
-            {
-                message: `uploaded successfully to db`,
-            },
-            { status: 200 }
-        );
+        return { message: `uploaded successfully to db` };
     } catch (err) {
-        return NextResponse.json(
-            { error: `Failed to upload` },
-            { status: 500 }
-        );
+        return { error: `Failed to upload to db` };
     }
 }
