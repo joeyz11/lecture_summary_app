@@ -29,12 +29,12 @@ export default function FlipCard({ frontText, backText, currentIndex }) {
                     onClick={toggleFlip}
                 >
                     <div className="absolute inset-0 [backface-visibility:hidden]">
-                        <div className="flex min-h-full flex-col items-center justify-center">
+                        <div className="p-4 flex min-h-full flex-col items-center justify-center">
                             {frontText}
                         </div>
                     </div>
                     <div className="absolute inset-0 [backface-visibility:hidden] h-full w-full rounded-xl [transform-style:preserve-3d] [transform:rotateY(180deg)]">
-                        <div className="flex min-h-full flex-col items-center justify-center">
+                        <div className="p-4 flex min-h-full flex-col items-center justify-center">
                             {backText}
                         </div>
                     </div>

@@ -27,7 +27,6 @@ export default async function pollVtt(user_id, created_at) {
             });
             audioRes = await docClient.send(audioGetCommand);
             vtt = audioRes.Item.vtt;
-            console.log("polling vtt", vtt, created_at);
             if (vtt) {
                 console.log("successfully got vtt");
                 return { message: `successfully got vtt` };
@@ -42,5 +41,6 @@ export default async function pollVtt(user_id, created_at) {
         }
     }
 
+    console.log(`Error polling vtt exceeded ${TIMEOUT} milliseconds`, err);
     return { error: `Error polling vtt exceeded ${TIMEOUT} milliseconds` };
 }

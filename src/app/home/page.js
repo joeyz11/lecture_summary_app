@@ -35,7 +35,7 @@ export default function HomePage() {
     const replaceWithHomeCard = (created_at) => {
         setHomeCards((prevHomeCards) => {
             const indexToReplace = prevHomeCards.findIndex(
-                (card) => card.created_at === created_at
+                (card) => card.is_shadow && card.created_at === created_at
             );
 
             if (indexToReplace !== -1) {

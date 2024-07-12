@@ -12,7 +12,7 @@ export default function SummaryPage({ params }) {
 
     useEffect(() => {
         let timeoutId;
-        const fetchAudio = () => {
+        const pollAudio = () => {
             fetch(`/api/getAudioData?&created_at=${created_at}`, {
                 method: "GET",
                 headers: {
@@ -31,7 +31,7 @@ export default function SummaryPage({ params }) {
                     ) {
                         clearTimeout(timeoutId);
                         timeoutId = setTimeout(
-                            fetchAudio,
+                            pollAudio,
                             AUDIO_DATA_POLL_INTERVAL
                         );
                     }
@@ -42,7 +42,7 @@ export default function SummaryPage({ params }) {
                 });
         };
 
-        fetchAudio();
+        pollAudio();
 
         return () => {
             clearTimeout(timeoutId);
